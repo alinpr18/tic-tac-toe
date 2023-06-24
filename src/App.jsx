@@ -1,37 +1,15 @@
 import confetti from 'canvas-confetti'
-import { useState } from 'react'
 import { Board } from './components/Board'
 import { Square } from './components/Square'
 import { TURNS } from './constants'
 import { checkEndGame, checkWinner } from './logic/board'
-import { resetGameStorage, saveGameToStorage } from './logic/storage'
+import { resetGameStorage } from './logic/storage'
+import { useLocalStorage } from './hooks/useLocalStorage'
 
 export function App () {
-  const [board, setBoard] = useState(() => {
-    const boardFromStorage = window.localStorage.getItem('board')
-    if (boardFromStorage) return JSON.parse(boardFromStorage)
-    return Array(9).fill(null)
-  })
-  const [turn, setTurn] = useState(() => {
-    const turnFormStorage = window.localStorage.getItem('turn')
-    return turnFormStorage ?? TURNS.X
-  })
-  const [winner, setWinner] = useState(() => {
-    const winnerFromStorage = window.localStorage.getItem('winner')
-    if (winnerFromStorage === TURNS.X) {
-      return TURNS.X
-    }
-
-    if (winnerFromStorage === TURNS.O) {
-      return TURNS.O
-    }
-
-    if (winnerFromStorage === 'false') {
-      return false
-    }
-
-    return null
-  })
+  const [board, setBoard] = useLocalStorage('board', Array(9).fill(null))
+  const [turn, setTurn] = useLocalStorage('turn', TURNS.X)
+  const [winner, setWinner] = useLocalStorage('winner', null)
 
   const updateBoard = (index) => {
     if (board[index] || winner) return
@@ -44,16 +22,12 @@ export function App () {
     setTurn(newTurn)
 
     const newWinner = checkWinner(newBoard)
-    let status
     if (newWinner) {
-      status = newWinner
       confetti()
       setWinner(newWinner)
     } else if (checkEndGame(newBoard)) {
-      status = false
       setWinner(false)
     }
-    saveGameToStorage({ board: newBoard, turn: newTurn, winner: status })
   }
 
   const resetGame = () => {
