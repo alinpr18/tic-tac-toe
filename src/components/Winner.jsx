@@ -16,7 +16,7 @@ export function Winner ({ winner, turn }) {
     )
   }
 
-  if (winner === TURNS.X | TURNS.O) {
+  if (winner === TURNS.X || winner === TURNS.O) {
     status = (
       <>
         <h2>El ganador es:</h2>
